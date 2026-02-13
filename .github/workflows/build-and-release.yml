@@ -46,43 +46,12 @@ jobs:
         run: echo "version=$(date +'%Y.%m.%d')" >> $GITHUB_OUTPUT
 
       - name: Create Release
-        uses: actions/create-release@v1
-        id: create_release
+        uses: ncipollo/release-action@v1
         with:
+          artifacts: "./publish/aisreplay-linux-x64.tar.gz,./publish/aisreplay-macos-x64.tar.gz,./publish/aisreplay-windows-x64.zip"
           draft: false
           prerelease: false
-          release_name: Release ${{ steps.version.outputs.version }}
-          tag_name: v${{ steps.version.outputs.version }}
-          body_path: CHANGELOG.md
-        env:
-          GITHUB_TOKEN: ${{ github.token }}
-
-      - name: Upload Linux archive
-        uses: actions/upload-release-asset@v1
-        with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ./publish/aisreplay-linux-x64.tar.gz
-          asset_name: aisreplay-linux-x64.tar.gz
-          asset_content_type: application/gzip
-        env:
-          GITHUB_TOKEN: ${{ github.token }}
-
-      - name: Upload macOS archive
-        uses: actions/upload-release-asset@v1
-        with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ./publish/aisreplay-macos-x64.tar.gz
-          asset_name: aisreplay-macos-x64.tar.gz
-          asset_content_type: application/gzip
-        env:
-          GITHUB_TOKEN: ${{ github.token }}
-
-      - name: Upload Windows archive
-        uses: actions/upload-release-asset@v1
-        with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ./publish/aisreplay-windows-x64.zip
-          asset_name: aisreplay-windows-x64.zip
-          asset_content_type: application/zip
-        env:
-          GITHUB_TOKEN: ${{ github.token }}
+          name: Release ${{ steps.version.outputs.version }}
+          tag: v${{ steps.version.outputs.version }}
+          body: "Automated release of AisReplay"
+          token: ${{ github.token }}
