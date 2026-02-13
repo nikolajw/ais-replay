@@ -32,8 +32,8 @@ This is useful for:
 
 1. Clone the repository:
    ```bash
-   git clone <repository-url>
-   cd AisReplay
+   git clone git@github.com:nikolajw/ais-replay.git
+   cd ais-replay
    ```
 
 2. Build the project:
