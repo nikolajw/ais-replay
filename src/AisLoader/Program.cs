@@ -31,11 +31,11 @@ class Program
             ? new StreamWriter(Console.OpenStandardOutput(), Encoding.UTF8)
             : new StreamWriter(outputDest, false, Encoding.UTF8);
 
-        return await WriteRecords(csvPaths, outputWriter, mmsiFilter, options);
+        return await WriteRecords(csvPaths, outputWriter, mmsiFilter);
     }
 
     private static async Task<int> WriteRecords(List<string> csvPaths, StreamWriter outputWriter,
-        HashSet<int> mmsiFilter, Options options)
+        HashSet<int> mmsiFilter)
     {
         var totalRecords = 0;
         var filteredRecords = 0;
@@ -184,13 +184,13 @@ class Program
         var csv = Path.Combine(cacheDir, $"aisdk-{date}.csv");
         if (File.Exists(csv))
         {
-            Console.WriteLine($"Using cached {csv}");
+            Console.Error.WriteLine($"Using cached {csv}");
             return csv;
         }
 
         var url = $"http://aisdata.ais.dk/aisdk-{date}.zip";
         var zipPath = Path.Combine(cacheDir, $"aisdk-{date}.zip");
-        Console.WriteLine($"Downloading {url} ...");
+        Console.Error.WriteLine($"Downloading {url} ...");
         using var client = new HttpClient();
         client.Timeout = TimeSpan.FromMinutes(30);
         using var response = await client.GetAsync(url);
@@ -200,12 +200,12 @@ class Program
             await response.Content.CopyToAsync(fs);
         }
 
-        Console.WriteLine("Extracting ...");
+        Console.Error.WriteLine("Extracting ...");
         await ZipFile.ExtractToDirectoryAsync(zipPath, cacheDir, true);
         File.Delete(zipPath);
         if (!File.Exists(csv))
             throw new Exception($"Expected CSV not found after extraction: {csv}");
-        Console.WriteLine($"Ready: {csv}");
+        Console.Error.WriteLine($"Ready: {csv}");
         return csv;
     }
 }
