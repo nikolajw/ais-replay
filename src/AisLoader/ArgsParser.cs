@@ -8,6 +8,18 @@ public static class ArgsParser
 {
     public static Options Parse(string[] args)
     {
+        if (args.Contains("--help") || args.Contains("-h"))
+        {
+            PrintHelp();
+            System.Environment.Exit(0);
+        }
+
+        if (args.Contains("--version"))
+        {
+            System.Console.WriteLine("AisLoader 0.3.6");
+            System.Environment.Exit(0);
+        }
+
         var inputOption = new Option<FileInfo[]>("-i", "--input")
         {
             Arity = ArgumentArity.ZeroOrMore,
@@ -74,5 +86,26 @@ public static class ArgsParser
             Exclude = exclude,
             Dates = dates
         };
+    }
+
+    private static void PrintHelp()
+    {
+        System.Console.WriteLine("""
+            AisLoader - Filter Automatic Identification System (AIS) CSV data by vessel MMSI
+
+            USAGE:
+                AisLoader [OPTIONS]
+
+            OPTIONS:
+                -i, --input <FILE>         Input CSV file path(s) (can be specified multiple times)
+                -o, --output <FILE>        Output CSV file path (default: write to stdout)
+                -m, --mmsi-file <FILE>     File containing MMSI numbers to filter (one per line)
+                -l, --mmsi-list <LIST>     Comma-separated list of MMSI numbers to filter
+                    --mmsi-stdin           Read MMSI numbers from stdin (one per line)
+                -e, --exclude              Exclude the specified MMSIs instead of including only them
+                -d, --date <DATE>          Download data from ais.dk for specific date(s) (YYYY-MM-DD, can be specified multiple times)
+                -h, --help                 Show this help message
+                    --version              Show version information
+            """);
     }
 }
