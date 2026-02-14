@@ -139,6 +139,19 @@ Pre-built binaries are available for:
 
 Download from [GitHub Releases](https://github.com/nikolajw/ais-replay/releases).
 
+### macOS Security Warning
+
+On macOS, you may see a security warning: "Apple could not verify 'AisReplay' is free of malware."
+
+This appears because the binary is unsigned. To bypass this warning, run:
+
+```bash
+xattr -d com.apple.quarantine /path/to/AisReplay
+./AisReplay --file data.csv
+```
+
+Alternatively, right-click the executable and click "Open" to bypass the warning once.
+
 ## Development
 
 ### Project Structure

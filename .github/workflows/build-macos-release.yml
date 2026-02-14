@@ -34,6 +34,11 @@ jobs:
       - name: Publish for macOS (Apple Silicon)
         run: dotnet publish src/AisReplay.csproj --configuration Release --runtime osx-arm64 --self-contained --output ./publish/macos-arm64
 
+      - name: Code sign binaries
+        run: |
+          codesign -s - -f --deep ./publish/macos-x64/AisReplay
+          codesign -s - -f --deep ./publish/macos-arm64/AisReplay
+
       - name: Create archives
         run: |
           cd publish
