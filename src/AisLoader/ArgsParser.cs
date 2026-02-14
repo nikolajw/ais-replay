@@ -16,7 +16,7 @@ public static class ArgsParser
 
         if (args.Contains("--version"))
         {
-            System.Console.WriteLine("AisLoader 0.3.6");
+            System.Console.WriteLine("AisLoader 0.4.0");
             System.Environment.Exit(0);
         }
 
