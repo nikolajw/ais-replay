@@ -29,13 +29,13 @@ jobs:
       - name: Publish for Windows
         run: |
           dotnet publish src/AisReplay/AisReplay.csproj --configuration Release --runtime win-x64 --self-contained --output ./publish/windows-x64
-          dotnet publish src/AisFileLoader/AisFileLoader.csproj --configuration Release --runtime win-x64 --self-contained --output ./publish/windows-x64
+          dotnet publish src/AisLoader/AisLoader.csproj --configuration Release --runtime win-x64 --self-contained --output ./publish/windows-x64
 
       - name: Create archive
         shell: pwsh
         run: |
           cd publish
-          Compress-Archive -Path windows-x64 -DestinationPath aisreplay-windows-x64.zip
+          Compress-Archive -Path windows-x64 -DestinationPath aistools-windows-x64.zip
           Get-ChildItem *.zip | Format-List FullName, Length
 
       - name: Get version
@@ -56,11 +56,11 @@ jobs:
         if: startsWith(github.ref, 'refs/tags/')
         uses: ncipollo/release-action@v1
         with:
-          artifacts: "./publish/aisreplay-windows-x64.zip"
+          artifacts: "./publish/aistools-windows-x64.zip"
           draft: false
           prerelease: false
           name: Release ${{ steps.version.outputs.version }}
           tag: v${{ steps.version.outputs.version }}
           allowUpdates: true
-          body: "Windows x64 build - AisReplay and AisFileLoader"
+          body: "Windows x64 build - AisTools suite"
           token: ${{ github.token }}
