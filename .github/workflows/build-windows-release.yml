@@ -1,13 +1,11 @@
-name: Build and Release
+name: Build Windows Release
 
 on:
-  push:
-    branches:
-      - main
+  workflow_dispatch
 
 jobs:
-  build-linux:
-    runs-on: ubuntu-latest
+  build-windows:
+    runs-on: windows-latest
     permissions:
       contents: write
 
@@ -25,27 +23,30 @@ jobs:
       - name: Build project
         run: dotnet build --configuration Release --no-restore
 
-      - name: Publish for Linux
-        run: dotnet publish --configuration Release --runtime linux-x64 --self-contained --output ./publish/linux-x64
+      - name: Publish for Windows
+        run: dotnet publish --configuration Release --runtime win-x64 --self-contained --output ./publish/windows-x64
 
       - name: Create archive
+        shell: pwsh
         run: |
           cd publish
-          tar -czf aisreplay-linux-x64.tar.gz linux-x64/
+          Compress-Archive -Path windows-x64 -DestinationPath aisreplay-windows-x64.zip
 
       - name: Get version
         id: version
+        shell: pwsh
         run: |
-          VERSION=$(date +'%Y.%m.%d')-$(git rev-parse --short HEAD)
-          echo "version=$VERSION" >> $GITHUB_OUTPUT
+          $VERSION = (Get-Date -Format 'yyyy.MM.dd') + '-' + (git rev-parse --short HEAD)
+          "version=$VERSION" | Out-File -FilePath $env:GITHUB_OUTPUT -Encoding utf8 -Append
 
-      - name: Create Release
+      - name: Upload to Release
         uses: ncipollo/release-action@v1
         with:
-          artifacts: "./publish/aisreplay-linux-x64.tar.gz"
+          artifacts: "./publish/aisreplay-windows-x64.zip"
           draft: false
           prerelease: false
           name: Release ${{ steps.version.outputs.version }}
           tag: v${{ steps.version.outputs.version }}
-          body: "Automated release of AisReplay"
+          allowUpdates: true
+          body: "Windows build for AisReplay"
           token: ${{ github.token }}
