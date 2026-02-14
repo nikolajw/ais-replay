@@ -60,7 +60,7 @@ jobs:
           draft: false
           prerelease: false
           name: Release ${{ steps.version.outputs.version }}
-          tag: ${{ steps.version.outputs.version }}
+          tag: v${{ steps.version.outputs.version }}
           allowUpdates: true
           body: "Windows x64 build - AisReplay and AisFileLoader"
           token: ${{ github.token }}
