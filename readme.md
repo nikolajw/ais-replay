@@ -21,6 +21,40 @@ This is useful for:
 - Developing AIS data processing applications
 - Training and demonstration purposes
 
+## Projects in This Repository
+
+This repository contains two complementary command-line tools:
+
+### 1. AisReplay
+The main replay tool that broadcasts AIS data via UDP to marine navigation systems.
+
+**Features:**
+- Load AIS data from CSV files or download from aisdata.ais.dk
+- Broadcast to UDP endpoint (customizable host/port)
+- Filter by vessel MMSI
+- Convert to NMEA 0183 or GPS GPRMC format
+- Adjust playback speed
+- AOT compiled for fast startup and low memory usage
+
+### 2. AisReplayFilter
+A utility tool for preprocessing and filtering AIS CSV data before replay.
+
+**Features:**
+- Filter CSV files by MMSI (vessel) numbers
+- Load MMSI lists from files, command-line, or stdin
+- Download and filter data from aisdata.ais.dk
+- Output to file or stdout (can be piped to other tools)
+- Exclude mode (inverse filtering)
+- Unix-like stdin/stdout design for chaining commands
+
+**Example workflow:**
+```bash
+# Filter AIS data and pipe directly to replay tool
+cat vessel_list.txt | \
+  dotnet run --project src/AisReplayFilter/ -- -d 2024-01-15 | \
+  aisreplay --gps
+```
+
 ## Getting Started
 
 ### Requirements
@@ -192,20 +226,84 @@ Or right-click the executable and click "Open" to bypass the warning once.
 ### Project Structure
 ```
 .
-├── readme.md
+├── README.md
 ├── AisReplay.slnx          # Solution file
 └── src/
-    ├── Program.cs          # Entry point and CLI argument parsing
-    ├── AisRecord.cs        # Data model for AIS records
-    ├── CsvParser.cs        # CSV parsing logic
-    ├── NmeaEncoder.cs      # NMEA 0183 and GPS encoding logic
-    └── AisReplay.csproj    # Project configuration
+    ├── AisReplay/          # Main replay tool
+    │   ├── Program.cs      # Entry point and CLI argument parsing
+    │   ├── Options.cs      # Command-line options
+    │   ├── AisRecord.cs    # Data model for AIS records
+    │   ├── CsvParser.cs    # CSV parsing logic
+    │   ├── NmeaEncoder.cs  # NMEA 0183 and GPS encoding logic
+    │   └── AisReplay.csproj
+    │
+    └── AisReplayFilter/    # CSV filtering tool
+        ├── Program.cs      # Entry point and filtering logic
+        ├── Options.cs      # Command-line options
+        ├── AisRecord.cs    # Data model (shared)
+        ├── CsvParser.cs    # CSV parsing (shared)
+        └── AisReplayFilter.csproj
 ```
 
 ### Building & Testing
+
+Build both projects:
 ```bash
-dotnet build       # Build the project
-dotnet run -- --file test.csv  # Run with test data
+dotnet build
+```
+
+Run AisReplay with test data:
+```bash
+aisreplay --file test.csv
+```
+
+Run AisReplayFilter:
+```bash
+aisreplayfilter -i test.csv -m vessels.txt > filtered.csv
+```
+
+## AisReplayFilter Usage
+
+AisReplayFilter is a preprocessing tool to filter AIS CSV data by vessel MMSI numbers.
+
+### Basic Usage
+
+**Filter by MMSI list:**
+```bash
+aisreplayfilter -i input.csv -l "220382000,210409000" > output.csv
+```
+
+**Filter by MMSI file:**
+```bash
+aisreplayfilter -i input.csv -m vessels.txt > output.csv
+```
+
+**Pipe MMSI numbers from stdin:**
+```bash
+cat vessels.txt | aisreplayfilter -i input.csv
+
+# Or explicitly:
+aisreplayfilter -i input.csv --mmsi-stdin < vessels.txt
+```
+
+**Download and filter:**
+```bash
+aisreplayfilter -d 2024-01-15 -m vessels.txt > filtered.csv
+```
+
+**Exclude vessels (inverse filter):**
+```bash
+aisreplayfilter -i input.csv -m exclude_list.txt -e > output.csv
+```
+
+### Piping Between Tools
+
+Combine AisReplayFilter with AisReplay for powerful workflows:
+
+```bash
+# Filter, then replay
+cat vessel_list.txt | aisreplayfilter -d 2024-01-15 | \
+  aisreplay -f /dev/stdin -h 192.168.1.100 -p 5000
 ```
 
 ## Cache
