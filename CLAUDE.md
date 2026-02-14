@@ -103,6 +103,71 @@ Automated via GitHub Actions on push to `main`:
 4. Creates GitHub release with version tag: `v<YYYY.MM.DD>-<short-commit-sha>`
 5. Uploads archives as release artifacts
 
+## Complete Release Workflow
+
+When releasing a new version (from code change to Homebrew update):
+
+### 1. Make Code Changes and Commit
+```bash
+# Make your code changes
+# Test locally to verify
+git add <files>
+git commit -m "Fix/Feature description"
+git push origin main
+```
+
+### 2. Bump Version Numbers
+```bash
+# Update version in both projects
+sed -i '' 's/<Version>OLD<\/Version>/<Version>NEW<\/Version>/g' \
+  src/AisReplay/AisReplay.csproj src/AisLoader/AisLoader.csproj
+
+# Update ArgsParser.cs version method
+# Change: System.Console.WriteLine("AisLoader OLD");
+# To:     System.Console.WriteLine("AisLoader NEW");
+```
+
+### 3. Commit Version Bump
+```bash
+git add src/AisReplay/AisReplay.csproj src/AisLoader/AisLoader.csproj src/AisLoader/ArgsParser.cs
+git commit -m "Bump version to X.Y.Z"
+```
+
+### 4. Create and Push Tag
+```bash
+git tag -a vX.Y.Z -m "Release X.Y.Z - description"
+git push origin main vX.Y.Z
+```
+
+### 5. Wait for GitHub Actions
+- Wait for release artifacts to be created on GitHub
+- Verify all 4 artifacts exist (linux-x64, macos-arm64, macos-x64, windows-x64)
+
+### 6. Get SHA256 Hashes (via gh CLI, no download needed)
+```bash
+gh release view vX.Y.Z --repo nikolajw/ais-replay --json assets \
+  --jq '.assets[] | select(.name | contains("macos")) | "\(.name): \(.digest)"'
+```
+
+### 7. Update Homebrew Formulas
+In `/Users/nikolajw/Repositories/homebrew-aisreplay/Formula/`:
+
+Update **aisloader.rb**:
+- Change `version` from old to new
+- Update both macOS URLs to reference new tag (vX.Y.Z)
+- Update both SHA256 hashes with values from step 6
+
+Update **aisreplay.rb**:
+- Same changes as aisloader.rb
+
+### 8. Commit and Push Homebrew Changes
+```bash
+cd homebrew-aisreplay
+git add Formula/aisloader.rb Formula/aisreplay.rb
+git commit -m "Update Homebrew formulas to vX.Y.Z"
+git push origin main
+```
+
 ## Testing Notes
 
 - No formal test project; manual testing with CSV files is the primary validation method
