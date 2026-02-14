@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.IO.Compression;
+using System.Linq;
 using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
@@ -33,7 +34,8 @@ class Program
         return await WriteRecords(csvPaths, outputWriter, mmsiFilter, options);
     }
 
-    private static async Task<int> WriteRecords(List<string> csvPaths, StreamWriter outputWriter, HashSet<int> mmsiFilter, Options options)
+    private static async Task<int> WriteRecords(List<string> csvPaths, StreamWriter outputWriter,
+        HashSet<int> mmsiFilter, Options options)
     {
         var totalRecords = 0;
         var filteredRecords = 0;
@@ -64,11 +66,8 @@ class Program
                 if (fields.Length < 3 || !int.TryParse(fields[2], out var mmsi))
                     continue;
 
-                var shouldInclude = mmsiFilter.Contains(mmsi);
-                if (options.Exclude)
-                    shouldInclude = !shouldInclude;
-
-                if (!shouldInclude) continue;
+                if (!mmsiFilter.Contains(mmsi))
+                    continue;
 
                 await outputWriter.WriteLineAsync(line);
                 filteredRecords++;
@@ -104,17 +103,14 @@ class Program
 
         if (csvPaths.Count == 0)
         {
-            Console.Error.WriteLine("Error: At least one --input file or --date is required");
+            await Console.Error.WriteLineAsync("Error: At least one --input file or --date is required");
             return csvPaths;
         }
-        
-        foreach (var csvPath in csvPaths)
+
+        foreach (var csvPath in csvPaths.Where(csvPath => !File.Exists(csvPath)))
         {
-            if (!File.Exists(csvPath))
-            {
-                Console.Error.WriteLine($"Error: CSV file not found: {csvPath}");
-                return new List<string>();
-            }
+            await Console.Error.WriteLineAsync($"Error: CSV file not found: {csvPath}");
+            return [];
         }
 
 
@@ -129,7 +125,7 @@ class Program
         {
             if (!File.Exists(options.MmsiFile))
             {
-                Console.Error.WriteLine($"Error: MMSI file not found: {options.MmsiFile}");
+                await Console.Error.WriteLineAsync($"Error: MMSI file not found: {options.MmsiFile}");
                 return mmsiFilter;
             }
 
@@ -140,7 +136,7 @@ class Program
                     mmsiFilter.Add(mmsi);
             }
 
-            Console.Error.WriteLine($"Loaded {mmsiFilter.Count} MMSI numbers from file");
+            await Console.Error.WriteLineAsync($"Loaded {mmsiFilter.Count} MMSI numbers from file");
         }
         else if (!string.IsNullOrEmpty(options.MmsiList))
         {
@@ -151,25 +147,24 @@ class Program
                     mmsiFilter.Add(value);
             }
 
-            Console.Error.WriteLine($"Loaded {mmsiFilter.Count} MMSI numbers from list");
+            await Console.Error.WriteLineAsync($"Loaded {mmsiFilter.Count} MMSI numbers from list");
         }
         else if (options.MmsiStdin || Console.IsInputRedirected)
         {
-            Console.Error.WriteLine("Reading MMSI numbers from stdin...");
-            string? line;
+            await Console.Error.WriteLineAsync("Reading MMSI numbers from stdin...");
             var stdinReader = new StreamReader(Console.OpenStandardInput());
-            while ((line = await stdinReader.ReadLineAsync()) != null)
+            while (await stdinReader.ReadLineAsync() is { } line)
             {
                 if (int.TryParse(line.Trim(), out var mmsi) && mmsi > 0)
                     mmsiFilter.Add(mmsi);
             }
 
-            Console.Error.WriteLine($"Loaded {mmsiFilter.Count} MMSI numbers from stdin");
+            await Console.Error.WriteLineAsync($"Loaded {mmsiFilter.Count} MMSI numbers from stdin");
         }
 
         if (mmsiFilter.Count == 0)
         {
-            Console.Error.WriteLine(
+            await Console.Error.WriteLineAsync(
                 "Error: No MMSI numbers specified. Use --mmsi-file, --mmsi-list, or pipe MMSI numbers to stdin");
         }
 
@@ -189,16 +184,17 @@ class Program
         var url = $"http://aisdata.ais.dk/aisdk-{date}.zip";
         var zipPath = Path.Combine(cacheDir, $"aisdk-{date}.zip");
         Console.WriteLine($"Downloading {url} ...");
-        using var client = new HttpClient { Timeout = TimeSpan.FromMinutes(30) };
+        using var client = new HttpClient();
+        client.Timeout = TimeSpan.FromMinutes(30);
         using var response = await client.GetAsync(url);
         response.EnsureSuccessStatusCode();
-        using (var fs = File.Create(zipPath))
+        await using (var fs = File.Create(zipPath))
         {
             await response.Content.CopyToAsync(fs);
         }
 
         Console.WriteLine("Extracting ...");
-        ZipFile.ExtractToDirectory(zipPath, cacheDir, true);
+        await ZipFile.ExtractToDirectoryAsync(zipPath, cacheDir, true);
         File.Delete(zipPath);
         if (!File.Exists(csv))
             throw new Exception($"Expected CSV not found after extraction: {csv}");

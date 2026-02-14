@@ -7,6 +7,5 @@ public class Options
     public string? MmsiFile { get; set; }
     public string? MmsiList { get; set; }
     public bool MmsiStdin { get; set; }
-    public bool Exclude { get; set; }
     public string[] Dates { get; set; } = [];
 }
