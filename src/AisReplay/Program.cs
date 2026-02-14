@@ -10,14 +10,14 @@ using System.Threading.Tasks;
 using AisReplay;
 
 var cacheDir = Path.Combine(Path.GetTempPath(), "AisReplay");
-var options = ParseArguments(args);
+var (options, exitCode) = ParseArguments(args);
 
 if (options == null)
-    return 1;
+    return exitCode;
 
 return await RunAsync(options, cacheDir);
 
-static Options? ParseArguments(string[] args)
+static (Options?, int) ParseArguments(string[] args)
 {
     var options = new Options();
 
@@ -60,18 +60,18 @@ static Options? ParseArguments(string[] args)
                 break;
             case "-h" or "--help":
                 PrintHelp();
-                return null;
+                return (null, 0);
             case "--version":
                 Console.WriteLine("AisReplay 0.3.4");
-                return null;
+                return (null, 0);
             default:
                 Console.Error.WriteLine($"Unknown argument: {args[i]}");
                 PrintHelp();
-                return null;
+                return (null, 1);
         }
     }
 
-    return options;
+    return (options, 0);
 }
 
 static void PrintHelp()
