@@ -20,10 +20,14 @@ jobs:
           dotnet-version: '10.0'
 
       - name: Restore dependencies
-        run: dotnet restore src/AisReplay/AisReplay.csproj
+        run: |
+          dotnet restore src/AisReplay/AisReplay.csproj
+          dotnet restore src/AisLoader/AisLoader.csproj
 
       - name: Build project
-        run: dotnet build src/AisReplay/AisReplay.csproj --configuration Release --no-restore
+        run: |
+          dotnet build src/AisReplay/AisReplay.csproj --configuration Release --no-restore
+          dotnet build src/AisLoader/AisLoader.csproj --configuration Release --no-restore
 
       - name: Publish for Linux
         run: |
