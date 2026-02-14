@@ -88,7 +88,10 @@ class Program
 
     private static string GetOutputDestination(Options options)
     {
-        return string.IsNullOrEmpty(options.Output) ? "stdout" : options.Output;
+        if (!string.IsNullOrEmpty(options.Output))
+            return options.Output;
+
+        return Console.IsOutputRedirected ? "(file)" : "stdout";
     }
 
     private static async Task<List<string>> GetCsvPaths(string cacheDir, Options options)
