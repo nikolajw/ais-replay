@@ -62,7 +62,7 @@ static (Options?, int) ParseArguments(string[] args)
                 PrintHelp();
                 return (null, 0);
             case "--version":
-                Console.WriteLine("AisReplay 0.3.5");
+                Console.WriteLine("AisReplay 0.3.6");
                 return (null, 0);
             default:
                 Console.Error.WriteLine($"Unknown argument: {args[i]}");

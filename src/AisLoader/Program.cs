@@ -6,7 +6,7 @@ using System.Linq;
 using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
-using AisFileLoader;
+using AisLoader;
 
 var cacheDir = Path.Combine(Path.GetTempPath(), "AisReplay");
 var (options, exitCode) = ParseArguments(args);
@@ -56,7 +56,7 @@ static (Options?, int) ParseArguments(string[] args)
                 PrintHelp();
                 return (null, 0);
             case "--version":
-                Console.WriteLine("AisFileLoader 0.3.5");
+                Console.WriteLine("AisLoader 0.3.6");
                 return (null, 0);
             default:
                 Console.Error.WriteLine($"Unknown argument: {args[i]}");
@@ -73,10 +73,10 @@ static (Options?, int) ParseArguments(string[] args)
 static void PrintHelp()
 {
     Console.WriteLine("""
-        AisFileLoader - Filter Automatic Identification System (AIS) CSV data by vessel MMSI
+        AisLoader - Filter Automatic Identification System (AIS) CSV data by vessel MMSI
 
         USAGE:
-            AisFileLoader [OPTIONS]
+            AisLoader [OPTIONS]
 
         OPTIONS:
             -i, --input <FILE>         Input CSV file path(s) (can be specified multiple times)
