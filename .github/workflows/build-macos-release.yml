@@ -22,29 +22,29 @@ jobs:
 
       - name: Restore dependencies
         run: |
-          dotnet restore src/AisReplay/AisReplay.csproj
+          dotnet restore src/AisStreamer/AisStreamer.csproj
           dotnet restore src/AisLoader/AisLoader.csproj
 
       - name: Build project
         run: |
-          dotnet build src/AisReplay/AisReplay.csproj --configuration Release --no-restore
+          dotnet build src/AisStreamer/AisStreamer.csproj --configuration Release --no-restore
           dotnet build src/AisLoader/AisLoader.csproj --configuration Release --no-restore
 
       - name: Publish for macOS (Intel)
         run: |
-          dotnet publish src/AisReplay/AisReplay.csproj --configuration Release --runtime osx-x64 --self-contained --output ./publish/macos-x64
+          dotnet publish src/AisStreamer/AisStreamer.csproj --configuration Release --runtime osx-x64 --self-contained --output ./publish/macos-x64
           dotnet publish src/AisLoader/AisLoader.csproj --configuration Release --runtime osx-x64 --self-contained --output ./publish/macos-x64
 
       - name: Publish for macOS (Apple Silicon)
         run: |
-          dotnet publish src/AisReplay/AisReplay.csproj --configuration Release --runtime osx-arm64 --self-contained --output ./publish/macos-arm64
+          dotnet publish src/AisStreamer/AisStreamer.csproj --configuration Release --runtime osx-arm64 --self-contained --output ./publish/macos-arm64
           dotnet publish src/AisLoader/AisLoader.csproj --configuration Release --runtime osx-arm64 --self-contained --output ./publish/macos-arm64
 
       - name: Code sign binaries
         run: |
-          codesign -s - -f --deep ./publish/macos-x64/AisReplay
+          codesign -s - -f --deep ./publish/macos-x64/AisStreamer
           codesign -s - -f --deep ./publish/macos-x64/AisLoader
-          codesign -s - -f --deep ./publish/macos-arm64/AisReplay
+          codesign -s - -f --deep ./publish/macos-arm64/AisStreamer
           codesign -s - -f --deep ./publish/macos-arm64/AisLoader
 
       - name: Create archives
