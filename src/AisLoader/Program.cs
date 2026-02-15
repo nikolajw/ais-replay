@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.CommandLine;
+using System.Globalization;
 using System.IO;
 using System.IO.Compression;
 using System.Net.Http;
@@ -95,7 +96,7 @@ class Program
             }
 
             // Include line if MMSI matches the filter
-            if (uint.TryParse(fields[2], out var mmsi) && mmsiFilter.Contains(mmsi))
+            if (uint.TryParse(fields[2], NumberStyles.Integer, CultureInfo.InvariantCulture, out var mmsi) && mmsiFilter.Contains(mmsi))
             {
                 await Console.Out.WriteLineAsync(line);
                 ++filteredRecords;
