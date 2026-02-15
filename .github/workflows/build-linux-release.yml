@@ -60,5 +60,6 @@ jobs:
           prerelease: false
           name: Release ${{ steps.version.outputs.version }}
           tag: v${{ steps.version.outputs.version }}
+          allowUpdates: true
           body: "Linux x64 build - AisTools suite"
           token: ${{ github.token }}
