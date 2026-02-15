@@ -123,8 +123,8 @@ public static class NmeaEncoder
 
     public static string ToGprmc(AisRecord r)
     {
-        var time = r.Timestamp.ToString("HHmmss.ff");
-        var date = r.Timestamp.ToString("ddMMyy");
+        var time = r.Timestamp.ToString("HHmmss.ff", CultureInfo.InvariantCulture);
+        var date = r.Timestamp.ToString("ddMMyy", CultureInfo.InvariantCulture);
         var lat = ToNmeaCoord(r.Latitude);
         var ns = r.Latitude >= 0.0 ? "N" : "S";
         var lon = ToNmeaCoord(r.Longitude);
