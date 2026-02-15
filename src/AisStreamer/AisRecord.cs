@@ -1,6 +1,6 @@
 using System;
 
-namespace AisReplay;
+namespace AisStreamer;
 
 public record AisRecord(
     DateTime Timestamp,

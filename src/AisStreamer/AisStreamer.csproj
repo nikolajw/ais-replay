@@ -6,6 +6,7 @@
     <Nullable>enable</Nullable>
     <PublishAot>true</PublishAot>
     <Version>0.4.5</Version>
+    <RootNamespace>AisStreamer</RootNamespace>
   </PropertyGroup>
 
   <ItemGroup>

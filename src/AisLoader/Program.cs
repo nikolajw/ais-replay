@@ -100,7 +100,7 @@ class Program
     {
         if (dates == null || dates.Length == 0) yield break;
         
-        var cacheDir = Path.Combine(Path.GetTempPath(), "AisReplay");
+        var cacheDir = Path.Combine(Path.GetTempPath(), "AisStreamer");
 
         foreach (var date in dates)
         {

@@ -1,8 +1,8 @@
 using System;
 using System.Globalization;
-using AisReplay;
+using AisStreamer;
 
-namespace AisReplay;
+namespace AisStreamer;
 
 public static class CsvParser
 {

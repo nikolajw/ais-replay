@@ -1,7 +1,7 @@
 using System;
 using System.Globalization;
 
-namespace AisReplay;
+namespace AisStreamer;
 
 public static class NmeaEncoder
 {
