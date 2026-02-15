@@ -20,7 +20,7 @@ public static class NmeaEncoder
         return 15;
     }
 
-    public static byte[] BuildType1Bits(AisRecord r)
+    private static byte[] BuildType1Bits(AisRecord r)
     {
         var bits = new byte[168];
 
@@ -79,7 +79,7 @@ public static class NmeaEncoder
         return bits;
     }
 
-    public static (string Payload, int FillBits) EncodeBitsToArmor(byte[] bits)
+    private static (string Payload, int FillBits) EncodeBitsToArmor(byte[] bits)
     {
         var charCount = (bits.Length + 5) / 6;
         var fillBits = charCount * 6 - bits.Length;
@@ -98,7 +98,7 @@ public static class NmeaEncoder
         return (new string(chars), fillBits);
     }
 
-    public static string NmeaChecksum(string sentence)
+    private static string NmeaChecksum(string sentence)
     {
         var cs = 0;
         foreach (var c in sentence)

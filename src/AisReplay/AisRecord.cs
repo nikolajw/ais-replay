@@ -11,4 +11,7 @@ public record AisRecord(
     double Rot,
     double Sog,
     double Cog,
-    int Heading);
+    int Heading)
+{
+    public static AisRecord None => new(DateTime.MinValue, 0, 0D, 0D, "",  0D, 0D, 0D, 0);
+}

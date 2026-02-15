@@ -8,7 +8,9 @@ public static class CsvParser
 {
     public static AisRecord ParseAisRecord(string line)
     {
+        if (string.IsNullOrWhiteSpace(line) || line.StartsWith('#')) return AisRecord.None;
         var fields = line.Split(',');
+
         return new AisRecord(
             Timestamp: DateTime.ParseExact(fields[0], "dd/MM/yyyy HH:mm:ss", CultureInfo.InvariantCulture),
             Mmsi: int.Parse(fields[2]),

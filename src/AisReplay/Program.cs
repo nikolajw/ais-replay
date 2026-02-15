@@ -56,6 +56,8 @@ class Program
         {
             var record = CsvParser.ParseAisRecord(line);
 
+            if (record == AisRecord.None) continue;
+
             count++;
             if (count % speed != 0) return 0;
             
