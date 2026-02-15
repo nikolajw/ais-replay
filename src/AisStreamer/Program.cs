@@ -34,10 +34,10 @@ class Program
         };
         Option<FileInfo> fileOption = new("-f", "--input-file")
         {
-            Description = "Path to file to be streamed"
+            Description = "Path to input file to be streamed"
         };
 
-        
+
         RootCommand rootCommand = new();
 
         rootCommand.Options.Add(hostOption);
@@ -45,47 +45,70 @@ class Program
         rootCommand.Options.Add(speedOption);
         rootCommand.Options.Add(gpsOption);
         rootCommand.Options.Add(fileOption);
-        
+
+        rootCommand.SetAction(async parseResult =>
+        {
+            var host = parseResult.GetValue(hostOption)!;
+            var port = parseResult.GetValue(portOption);
+            var speed = parseResult.GetValue(speedOption);
+            var file = parseResult.GetValue(fileOption);
+            var gps = parseResult.GetValue(gpsOption);
+
+            return await PublishMessages(host, port, speed, file, gps);
+        });
+
         var parseResult = rootCommand.Parse(args);
+        await parseResult.InvokeAsync();
 
-        if (parseResult.Errors.Count != 0 ) return 1;
-
-        return await PublishMessages(parseResult.GetValue(hostOption)!, parseResult.GetValue(portOption), parseResult.GetValue(speedOption), parseResult.GetValue(fileOption), parseResult.GetValue(gpsOption));
+        return 0;
     }
 
-    private static async Task<int> PublishMessages(string host, int port, int speed, FileInfo? inputFile = null, bool gps = false)
+    private static async Task<int> PublishMessages(string host, int port, int speed, FileInfo? inputFile = null,
+        bool gps = false)
     {
-        using var udp = new UdpClient();
-        var endpoint = new IPEndPoint(IPAddress.Parse(host), port);
-
-        var prevTimestamp = DateTime.MinValue;
-        var count = 0;
-
-        var reader = inputFile?.OpenText() ?? Console.In;
-
-        while (await reader.ReadLineAsync() is { } line)
+        
+        try
         {
-            var record = CsvParser.ParseAisRecord(line);
+            using var udp = new UdpClient();
+            udp.Connect(host, port);
 
-            if (record == AisRecord.None) continue;
+            var prevTimestamp = DateTime.MinValue;
+            var count = 0;
 
-            count++;
-            if (count % speed != 0) return 0;
-            
+            var reader = inputFile?.OpenText() ?? Console.In;
+
+            while (await reader.ReadLineAsync() is { } line)
+            {
+                var record = CsvParser.ParseAisRecord(line);
+
+                if (record == AisRecord.None) continue;
+
+                Sleep(speed, prevTimestamp, record);
+    
+                var sentence = gps ? NmeaEncoder.ToGprmc(record) : NmeaEncoder.ToNmea0183(record);
+                var bytes = Encoding.ASCII.GetBytes(sentence + "\r\n");
+
+                await udp.SendAsync(bytes, bytes.Length);
+
+                Console.Error.WriteLine(record);
+                prevTimestamp = record.Timestamp;
+            }
+        }
+        catch (Exception e)
+        {
+            Console.Error.WriteLine(e.Message);
+        }
+
+        return 0;
+        }
+
+        private static void Sleep(int speed, DateTime prevTimestamp, AisRecord record)
+        {
             if (prevTimestamp != DateTime.MinValue)
             {
                 var delay = record.Timestamp - prevTimestamp;
                 if (delay.TotalMilliseconds > 0.0)
                     Thread.Sleep(delay / speed);
             }
-
-            var sentence = gps ? NmeaEncoder.ToGprmc(record) : NmeaEncoder.ToNmea0183(record);
-            var bytes = Encoding.ASCII.GetBytes(sentence + "\r\n");
-            await udp.SendAsync(bytes, bytes.Length, endpoint);
-            Console.WriteLine(record);
-            prevTimestamp = record.Timestamp;
         }
-        
-        return 0;
     }
-}

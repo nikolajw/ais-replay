@@ -22,14 +22,12 @@ class Program
             Description = "MMSI number to include in output"
         };
 
-        RootCommand rootCommand = new("AIS Loader");
+        RootCommand rootCommand = new("AIS Loader - Downloads AIS records, filters by MMSI, and writes them to stdout");
 
         rootCommand.Options.Add(dateOption);
         rootCommand.Options.Add(mmsiOption);
-
-        var parseResult = rootCommand.Parse(args);
-
-        if (parseResult.Errors.Count == 0)
+        
+        rootCommand.SetAction(async parseResult =>
         {
             var dates = parseResult.GetValue(dateOption);
             var mmsiFilter = parseResult.GetValue(mmsiOption);
@@ -47,14 +45,12 @@ class Program
             }
 
             return 0;
-        }
+        });
 
-        foreach (var parseError in parseResult.Errors)
-        {
-            Console.Error.WriteLine(parseError.Message);
-        }
-
-        return 1;
+        ParseResult parseResult = rootCommand.Parse(args);
+        await parseResult.InvokeAsync();
+        
+        return 0;
     }
 
     private static async Task WriteRecordsAsync(FileInfo file, uint[]? mmsiFilter)
