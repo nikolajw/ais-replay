@@ -24,7 +24,7 @@ public static class CsvParser
     }
 
     private static double ParseDouble(string s) =>
-        double.TryParse(s, out var result) ? result : 0;
+        double.TryParse(s, NumberStyles.Float, CultureInfo.InvariantCulture, out var result) ? result : 0;
 
     private static int ParseInt(string s) =>
         string.IsNullOrWhiteSpace(s) ? -1 : int.Parse(s);
