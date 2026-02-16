@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-**AisReplay** is a C# .NET application that replays Automatic Identification System (AIS) vessel tracking data. It reads AIS records from CSV files or downloads them from [aisdata.ais.dk](http://aisdata.ais.dk/), converts them to marine communication standards (NMEA 0183 or GPS GPRMC), and broadcasts them via UDP to `localhost:10110` for integration with marine navigation software.
+**ais-tools** is a C# .NET application that replays Automatic Identification System (AIS) vessel tracking data. It reads AIS records from CSV files or downloads them from [aisdata.ais.dk](http://aisdata.ais.dk/), converts them to marine communication standards (NMEA 0183 or GPS GPRMC), and broadcasts them via UDP to `localhost:10110` for integration with marine navigation software.
 
 ## Architecture
 
@@ -120,7 +120,7 @@ git push origin main
 ```bash
 # Update version in both projects
 sed -i '' 's/<Version>OLD<\/Version>/<Version>NEW<\/Version>/g' \
-  src/AisReplay/AisReplay.csproj src/AisLoader/AisLoader.csproj
+  src/AisStreamer/AisStreamer.csproj src/AisLoader/AisLoader.csproj
 
 # Update ArgsParser.cs version method
 # Change: System.Console.WriteLine("AisLoader OLD");
@@ -129,7 +129,7 @@ sed -i '' 's/<Version>OLD<\/Version>/<Version>NEW<\/Version>/g' \
 
 ### 3. Commit Version Bump
 ```bash
-git add src/AisReplay/AisReplay.csproj src/AisLoader/AisLoader.csproj src/AisLoader/ArgsParser.cs
+git add src/AisStreamer/AisStreamer.csproj src/AisLoader/AisLoader.csproj src/AisLoader/ArgsParser.cs
 git commit -m "Bump version to X.Y.Z"
 ```
 
@@ -184,5 +184,5 @@ git push origin main
 
 ## Cache Location
 
-- Downloaded files cached in: `%TEMP%/AisReplay/` (Windows) or `/tmp/AisReplay/` (Linux/macOS)
+- Downloaded files cached in: `%TEMP%/AisStreamer/` (Windows) or `/tmp/AisStreamer/` (Linux/macOS)
 - Use `--purge-cache` to clear cached files
