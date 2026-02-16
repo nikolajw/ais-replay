@@ -7,6 +7,7 @@
     <PublishAot>true</PublishAot>
     <Version>0.4.7</Version>
     <RootNamespace>AisStreamer</RootNamespace>
+    <AssemblyName>ais-streamer</AssemblyName>
   </PropertyGroup>
 
   <ItemGroup>
